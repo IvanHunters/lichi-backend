@@ -1,0 +1,463 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Lichi API",
+        "version": "0.1"
+    },
+    "paths": {
+        "/method/bots": {
+            "get": {
+                "tags": [
+                    "Bots"
+                ],
+                "operationId": "App\\Http\\Controllers\\BotController::__construct",
+                "responses": {
+                    "200": {
+                        "description": "Выводит ботов у пользователя"
+                    }
+                }
+            }
+        },
+        "/method/bot": {
+            "get": {
+                "tags": [
+                    "Bots"
+                ],
+                "operationId": "App\\Http\\Controllers\\BotController::__construct",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id бота",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Выводит информацию о боте пользователя"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Bots"
+                ],
+                "operationId": "App\\Http\\Controllers\\BotController::__construct",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id бота",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "storage_id",
+                        "in": "query",
+                        "description": "id хранилища",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "preset_id",
+                        "in": "query",
+                        "description": "id шаблона",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Имя бота",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "string32"
+                        }
+                    },
+                    {
+                        "name": "vk_status",
+                        "in": "query",
+                        "description": "Включение (1) или выключение (0) бота Вконтакте",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int1"
+                        }
+                    },
+                    {
+                        "name": "tg_status",
+                        "in": "query",
+                        "description": "Включение (1) или выключение (0) бота Телеграмм",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int1"
+                        }
+                    },
+                    {
+                        "name": "vb_status",
+                        "in": "query",
+                        "description": "Включение (1) или выключение (0) бота Viber",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int1"
+                        }
+                    },
+                    {
+                        "name": "vk_token_group",
+                        "in": "query",
+                        "description": "Токен группы Вконтакте",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "string32"
+                        }
+                    },
+                    {
+                        "name": "vk_token_user",
+                        "in": "query",
+                        "description": "Токен пользователя Вконтакте",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "string32"
+                        }
+                    },
+                    {
+                        "name": "vk_token_confirm",
+                        "in": "query",
+                        "description": "Confirm-токен для группы Вконтакте",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "string32"
+                        }
+                    },
+                    {
+                        "name": "vk_secret_key",
+                        "in": "query",
+                        "description": "Секретный ключ для Вконтакте",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "string32"
+                        }
+                    },
+                    {
+                        "name": "tg_token",
+                        "in": "query",
+                        "description": "Токен Телеграмм",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "string32"
+                        }
+                    },
+                    {
+                        "name": "tg_proxy",
+                        "in": "query",
+                        "description": "Телеграмм-прокси",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "string32"
+                        }
+                    },
+                    {
+                        "name": "vb_token",
+                        "in": "query",
+                        "description": "Токен Viber",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "string32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Обновляет информацию о боте пользователя"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Bots"
+                ],
+                "operationId": "App\\Http\\Controllers\\BotController::__construct",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Имя бота",
+                        "required": true,
+                        "style": "form",
+                        "schema": {
+                            "type": "string",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "storage_id",
+                        "in": "query",
+                        "description": "id хранилища пользователя",
+                        "required": true,
+                        "style": "form",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "preset_id",
+                        "in": "query",
+                        "description": "id пресета бота",
+                        "required": true,
+                        "style": "form",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Создает бота пользователя"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Bots"
+                ],
+                "operationId": "App\\Http\\Controllers\\BotController::__construct",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id бота",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Удаляет бота пользователя"
+                    }
+                }
+            }
+        },
+        "/method/storages": {
+            "get": {
+                "tags": [
+                    "Storage"
+                ],
+                "operationId": "App\\Http\\Controllers\\StorageController::__construct",
+                "responses": {
+                    "200": {
+                        "description": "Выводит хранилища у пользователя"
+                    }
+                }
+            }
+        },
+        "/method/storage": {
+            "get": {
+                "tags": [
+                    "Storage"
+                ],
+                "operationId": "App\\Http\\Controllers\\StorageController::__construct",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id бота",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Выводит информацию о хранилище пользователя"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Storage"
+                ],
+                "operationId": "App\\Http\\Controllers\\StorageController::__construct",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id бота",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Изменяет хранилище пользователя (только пользовательское)"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Storage"
+                ],
+                "operationId": "App\\Http\\Controllers\\StorageController::__construct",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Имя хранилища",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "string32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Создает хранилище сервиса"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Storage"
+                ],
+                "operationId": "App\\Http\\Controllers\\StorageController::__construct",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id бота",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Удаляет хранилище пользователя"
+                    }
+                }
+            }
+        },
+        "/method/storage-custom": {
+            "post": {
+                "tags": [
+                    "Storage"
+                ],
+                "operationId": "App\\Http\\Controllers\\StorageController::__construct",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Имя хранилища",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "string32"
+                        }
+                    },
+                    {
+                        "name": "host",
+                        "in": "query",
+                        "description": "Хост хранилища",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "string32"
+                        }
+                    },
+                    {
+                        "name": "port",
+                        "in": "query",
+                        "description": "Порт хранилища",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "database",
+                        "in": "query",
+                        "description": "Имя базы данных хранилища",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "string32"
+                        }
+                    },
+                    {
+                        "name": "username",
+                        "in": "query",
+                        "description": "Имя пользователя хранилища",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "string32"
+                        }
+                    },
+                    {
+                        "name": "password",
+                        "in": "query",
+                        "description": "Пароль от хранилища",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "string32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Создает пользовательское хранилище"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Storage",
+            "description": "Работа с хранилищами"
+        },
+        {
+            "name": "Bots",
+            "description": "Работа с ботами"
+        }
+    ]
+}
