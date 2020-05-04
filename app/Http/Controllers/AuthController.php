@@ -1,36 +1,136 @@
-<?php namespace App\Http\Controllers;
+<?php
+namespace App\Http\Controllers;
 
-use App\User;
-use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\RegisterRequest;
+use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use JWTAuth;
+use Hash;
+use App\User;
+use Tymon\JWTAuth\Exceptions\JWTException;
 
 class AuthController extends Controller
 {
-    /**
-     * Create a new AuthController instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('auth:api', ['except' => ['login', 'registration']]);
-    }
+  /**
+  *
+  * @OA\Post(
+  *     path="/api/auth/login",
+  *     tags={"Auth"},
+  *     @OA\Parameter(
+  *         name="email",
+  *         in="query",
+  *         description="Почта пользователя",
+  *         required=true,
+  *         @OA\Schema(
+  *             type="string",
+  *             format="string32"
+  *         )
+  *     ),
+  *     @OA\Parameter(
+  *         name="password",
+  *         in="query",
+  *         description="Пароль пользователя",
+  *         required=true,
+  *         @OA\Schema(
+  *             type="string",
+  *             format="string32"
+  *         )
+  *     ),
+  *     @OA\Response(response="200", description="Авторизует пользователя")
+  * )
+  *
+  * @OA\Post(
+  *     path="/api/auth/registration",
+  *     tags={"Auth"},
+  *     @OA\Parameter(
+  *         name="name",
+  *         in="query",
+  *         description="Имя пользоваьтеля",
+  *         required=true,
+  *         @OA\Schema(
+  *             type="string",
+  *             format="string32"
+  *         )
+  *     ),
+  *     @OA\Parameter(
+  *         name="email",
+  *         in="query",
+  *         description="Почта пользователя",
+  *         required=true,
+  *         @OA\Schema(
+  *             type="string",
+  *             format="string32"
+  *         )
+  *     ),
+  *     @OA\Parameter(
+  *         name="password",
+  *         in="query",
+  *         description="Пароль пользователя",
+  *         required=true,
+  *         @OA\Schema(
+  *             type="string",
+  *             format="string32"
+  *         )
+  *     ),
+  *     @OA\Response(response="200", description="Авторизует пользователя")
+  * )
+  *
+  * @OA\Post(
+  *     path="/api/auth/refresh",
+  *     tags={"Auth"},
+  *     @OA\Response(response="200", description="Обновляет токен пользователя")
+  * )
+  *
+  * @OA\Post(
+  *     path="/api/auth/me",
+  *     tags={"Auth"},
+  *     @OA\Response(response="200", description="Выводит информацию о пользователе")
+  * )
+  *
+  */
+  public function __construct()
+  {
+    $this->data = [
+    'status' => false,
+    'code' => 401,
+    'data' => null,
+    'err' => [
+    'code' => 1,
+    'message' => 'Unauthorized'
+    ]
+    ];
+  }
 
     /**
      * Get a JWT via given credentials.
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function login(Request $req)
-    {
-        $credentials = $req->input();
-
-        if (! $token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
-        return $this->respondWithToken($token);
-    }
+     public function login(Request $request): JsonResponse
+     {
+       $credentials = $request->only(['email', 'password']);
+       try {
+         if (!$token = JWTAuth::attempt($credentials)) {
+           throw new Exception('invalid_credentials');
+         }
+         $this->data = [
+           'status' => true,
+           'code' => 200,
+           'data' => [
+           '_token' => $token
+         ],
+          'err' => null
+         ];
+       } catch (Exception $e) {
+         $this->data['err']['message'] = $e->getMessage();
+         $this->data['code'] = 401;
+       } catch (JWTException $e) {
+         $this->data['err']['message'] = 'Could not create token';
+         $this->data['code'] = 500;
+       }
+       return response()->json($this->data, $this->data['code']);
+     }
 
     /**
      * User registration
@@ -55,46 +155,48 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function me()
-    {
-        return response()->json(auth()->user());
-    }
+     public function me(): JsonResponse
+     {
+     $this->data = [
+     'status' => true,
+     'code' => 200,
+     'data' => [
+     'User' => auth()->user()
+     ],
+     'err' => null
+     ];
+     return response()->json($this->data);
+     }
 
-    /**
-     * Log the user out (Invalidate the token).
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function logout()
-    {
-        auth()->logout();
-
-        return response()->json(['message' => 'Successfully logged out']);
-    }
+     public function logout(): JsonResponse
+     {
+       auth()->logout();
+       $data = [
+         'status' => true,
+         'code' => 200,
+         'data' => [
+         'message' => 'Successfully logged out'
+       ],
+        'err' => null
+       ];
+       return response()->json($data);
+     }
 
     /**
      * Refresh a token.
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function refresh()
-    {
-        return $this->respondWithToken(auth()->refresh());
-    }
-
-    /**
-     * Get the token array structure.
-     *
-     * @param  string $token
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    protected function respondWithToken($token)
-    {
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60
-        ]);
-    }
+     public function refresh(): JsonResponse
+      {
+        $data = [
+          'status' => true,
+          'code' => 200,
+          'data' => [
+          '_token' => auth()->refresh()
+        ],
+          'err' => null
+        ];
+        return response()->json($data, 200);
+      }
 }

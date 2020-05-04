@@ -9,13 +9,13 @@ class BotController extends Controller
   /**
   *
   * @OA\Get(
-  *     path="/method/bots",
+  *     path="/api/auth/method/bots",
   *     tags={"Bots"},
   *     @OA\Response(response="200", description="Выводит ботов у пользователя")
   * )
   *
   * @OA\Get(
-  *     path="/method/bot",
+  *     path="/api/auth/method/bot",
   *     tags={"Bots"},
   *     @OA\Parameter(
   *         name="id",
@@ -31,7 +31,7 @@ class BotController extends Controller
   * )
   *
   * @OA\Post(
-  *     path="/method/bot",
+  *     path="/api/auth/method/bot",
   *     tags={"Bots"},
   *     @OA\Parameter(
   *         name="name",
@@ -70,7 +70,7 @@ class BotController extends Controller
   * )
   *
   * @OA\Put(
-  *     path="/method/bot",
+  *     path="/api/auth/method/bot",
   *     tags={"Bots"},
   *     @OA\Parameter(
   *         name="id",
@@ -217,7 +217,7 @@ class BotController extends Controller
   *
   * @OA\Delete(
   *     tags={"Bots"},
-  *     path="/method/bot",
+  *     path="/api/auth/method/bot",
   *     @OA\Parameter(
   *         name="id",
   *         in="path",

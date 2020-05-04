@@ -11,12 +11,12 @@ class StorageController extends Controller
     /**
     *
     * @OA\Get(
-    *     path="/method/storages",
+    *     path="/api/auth/method/storages",
     *     tags={"Storage"},
     *     @OA\Response(response="200", description="Выводит хранилища у пользователя")
     * ),
     * @OA\Get(
-    *     path="/method/storage",
+    *     path="/api/auth/method/storage",
     *     tags={"Storage"},
     *     @OA\Parameter(
     *         name="id",
@@ -31,7 +31,7 @@ class StorageController extends Controller
     *     @OA\Response(response="200", description="Выводит информацию о хранилище пользователя")
     * ),
     * @OA\Post(
-    *     path="/method/storage",
+    *     path="/api/auth/method/storage",
     *     tags={"Storage"},
     *     @OA\Parameter(
     *         name="name",
@@ -46,7 +46,7 @@ class StorageController extends Controller
     *     @OA\Response(response="200", description="Создает хранилище сервиса")
     * ),
     * @OA\Post(
-    *     path="/method/storage-custom",
+    *     path="/api/auth/method/storage-custom",
     *     tags={"Storage"},
     *     @OA\Parameter(
     *         name="name",
@@ -111,7 +111,7 @@ class StorageController extends Controller
     *     @OA\Response(response="200", description="Создает пользовательское хранилище")
     * )
     * @OA\Put(
-    *     path="/method/storage",
+    *     path="/api/auth/method/storage",
     *     tags={"Storage"},
     *     @OA\Parameter(
     *         name="id",
@@ -126,7 +126,7 @@ class StorageController extends Controller
     *     @OA\Response(response="200", description="Изменяет хранилище пользователя (только пользовательское)")
     * ),
     * @OA\Delete(
-    *     path="/method/storage",
+    *     path="/api/auth/method/storage",
     *     tags={"Storage"},
     *     @OA\Parameter(
     *         name="id",

@@ -10,8 +10,11 @@ use Illuminate\Routing\Controller as BaseController;
 class Controller extends BaseController
 {
     /**
-    * @OA\Info(title="Lichi API", version="0.1")
-    *
+    * @OA\Info(title="Lichi API", version="0.5")
+    * @OA\Tag(
+    *   name="Auth",
+    *   description="Работа с сессией"
+    * )
     * @OA\Tag(
     *   name="Storage",
     *   description="Работа с хранилищами"
