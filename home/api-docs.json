@@ -5,12 +5,46 @@
         "version": "0.5"
     },
     "paths": {
+        "/api/auth/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "operationId": "App\\Http\\Controllers\\AuthController::__construct",
+                "parameters": [
+                    {
+                        "name": "email",
+                        "in": "query",
+                        "description": "Почта пользователя",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "string32"
+                        }
+                    },
+                    {
+                        "name": "password",
+                        "in": "query",
+                        "description": "Пароль пользователя",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "string32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Авторизует пользователя"
+                    }
+                }
+            }
+        },
         "/api/auth/registration": {
             "post": {
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Регистрация пользователя",
                 "operationId": "App\\Http\\Controllers\\AuthController::__construct",
                 "parameters": [
                     {
@@ -51,38 +85,15 @@
                 }
             }
         },
-        "/api/auth/login": {
+        "/api/auth/refresh": {
             "post": {
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Авторизация пользователя",
                 "operationId": "App\\Http\\Controllers\\AuthController::__construct",
-                "parameters": [
-                    {
-                        "name": "email",
-                        "in": "query",
-                        "description": "Почта пользователя",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "string32"
-                        }
-                    },
-                    {
-                        "name": "password",
-                        "in": "query",
-                        "description": "Пароль пользователя",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "string32"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
-                        "description": "Авторизует пользователя"
+                        "description": "Обновляет токен пользователя"
                     }
                 }
             }
@@ -92,37 +103,12 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Получение информации о пользователе",
                 "operationId": "App\\Http\\Controllers\\AuthController::__construct",
                 "responses": {
                     "200": {
                         "description": "Выводит информацию о пользователе"
                     }
-                },
-                "security": [
-                    {
-                        "apiAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/auth/refresh": {
-            "post": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Получение долгоживущего токена пользователя",
-                "operationId": "App\\Http\\Controllers\\AuthController::__construct",
-                "responses": {
-                    "200": {
-                        "description": "Обновляет токен пользователя"
-                    }
-                },
-                "security": [
-                    {
-                        "apiAuth": []
-                    }
-                ]
+                }
             }
         },
         "/api/methods/bots": {
@@ -130,26 +116,19 @@
                 "tags": [
                     "Bots"
                 ],
-                "summary": "Вывести всех ботов пользователя",
                 "operationId": "App\\Http\\Controllers\\BotController::__construct",
                 "responses": {
                     "200": {
                         "description": "Выводит ботов у пользователя"
                     }
-                },
-                "security": [
-                    {
-                        "apiAuth": []
-                    }
-                ]
+                }
             }
         },
-        "/api/methods/bot/{id}": {
+        "/api/methods/bot": {
             "get": {
                 "tags": [
                     "Bots"
                 ],
-                "summary": "Вывести информацию о боте пользователя",
                 "operationId": "App\\Http\\Controllers\\BotController::__construct",
                 "parameters": [
                     {
@@ -167,18 +146,12 @@
                     "200": {
                         "description": "Выводит информацию о боте пользователя"
                     }
-                },
-                "security": [
-                    {
-                        "apiAuth": []
-                    }
-                ]
+                }
             },
             "put": {
                 "tags": [
                     "Bots"
                 ],
-                "summary": "Изменить бота пользователя",
                 "operationId": "App\\Http\\Controllers\\BotController::__construct",
                 "parameters": [
                     {
@@ -326,49 +299,12 @@
                     "200": {
                         "description": "Обновляет информацию о боте пользователя"
                     }
-                },
-                "security": [
-                    {
-                        "apiAuth": []
-                    }
-                ]
+                }
             },
-            "delete": {
-                "tags": [
-                    "Bots"
-                ],
-                "summary": "Удалить бота пользователя",
-                "operationId": "App\\Http\\Controllers\\BotController::__construct",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "id бота",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int64"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Удаляет бота пользователя"
-                    }
-                },
-                "security": [
-                    {
-                        "apiAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/methods/bot": {
             "post": {
                 "tags": [
                     "Bots"
                 ],
-                "summary": "Создать бота пользователя",
                 "operationId": "App\\Http\\Controllers\\BotController::__construct",
                 "parameters": [
                     {
@@ -411,20 +347,37 @@
                     "200": {
                         "description": "Создает бота пользователя"
                     }
-                },
-                "security": [
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Bots"
+                ],
+                "operationId": "App\\Http\\Controllers\\BotController::__construct",
+                "parameters": [
                     {
-                        "apiAuth": []
+                        "name": "id",
+                        "in": "path",
+                        "description": "id бота",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
                     }
-                ]
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Удаляет бота пользователя"
+                    }
+                }
             }
         },
-        "/api/methods/storages": {
+        "api/methods/storages": {
             "get": {
                 "tags": [
                     "Storage"
                 ],
-                "summary": "Вывести все хранилища пользователя",
                 "operationId": "App\\Http\\Controllers\\StorageController::__construct",
                 "responses": {
                     "200": {
@@ -438,12 +391,11 @@
                 ]
             }
         },
-        "/api/methods/storage/{id}": {
+        "api/methods/storage": {
             "get": {
                 "tags": [
                     "Storage"
                 ],
-                "summary": "Вывести информацию о хранилище пользователя",
                 "operationId": "App\\Http\\Controllers\\StorageController::__construct",
                 "parameters": [
                     {
@@ -461,18 +413,12 @@
                     "200": {
                         "description": "Выводит информацию о хранилище пользователя"
                     }
-                },
-                "security": [
-                    {
-                        "apiAuth": []
-                    }
-                ]
+                }
             },
             "put": {
                 "tags": [
                     "Storage"
                 ],
-                "summary": "Изменить данные пользовательского хранилища пользователя",
                 "operationId": "App\\Http\\Controllers\\StorageController::__construct",
                 "parameters": [
                     {
@@ -490,49 +436,12 @@
                     "200": {
                         "description": "Изменяет хранилище пользователя (только пользовательское)"
                     }
-                },
-                "security": [
-                    {
-                        "apiAuth": []
-                    }
-                ]
+                }
             },
-            "delete": {
-                "tags": [
-                    "Storage"
-                ],
-                "summary": "Удалить хранилище пользователя",
-                "operationId": "App\\Http\\Controllers\\StorageController::__construct",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "id бота",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int64"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Удаляет хранилище пользователя"
-                    }
-                },
-                "security": [
-                    {
-                        "apiAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/methods/storage": {
             "post": {
                 "tags": [
                     "Storage"
                 ],
-                "summary": "Создать сервисное хранилище пользователя",
                 "operationId": "App\\Http\\Controllers\\StorageController::__construct",
                 "parameters": [
                     {
@@ -550,20 +459,37 @@
                     "200": {
                         "description": "Создает хранилище сервиса"
                     }
-                },
-                "security": [
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Storage"
+                ],
+                "operationId": "App\\Http\\Controllers\\StorageController::__construct",
+                "parameters": [
                     {
-                        "apiAuth": []
+                        "name": "id",
+                        "in": "path",
+                        "description": "id бота",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
                     }
-                ]
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Удаляет хранилище пользователя"
+                    }
+                }
             }
         },
-        "/api/methods/storage-custom": {
+        "api/methods/storage-custom": {
             "post": {
                 "tags": [
                     "Storage"
                 ],
-                "summary": "Создать пользовательское хранилище пользователя",
                 "operationId": "App\\Http\\Controllers\\StorageController::__construct",
                 "parameters": [
                     {
@@ -631,12 +557,7 @@
                     "200": {
                         "description": "Создает пользовательское хранилище"
                     }
-                },
-                "security": [
-                    {
-                        "apiAuth": []
-                    }
-                ]
+                }
             }
         }
     },

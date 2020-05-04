@@ -14,33 +14,41 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
-Route::group([ 'middleware' => ['api'],
-'prefix' => 'auth'], static function ($router) {
-Route::post('login', 'AuthController@login');
-Route::post('register', 'AuthController@register');
-Route::group(['middleware' => 'jwt.verify'], static function($router){
-Route::post('logout', 'AuthController@logout');
-Route::post('refresh', 'AuthController@refresh');
-Route::post('me', 'AuthController@me'); });
-    /*  События с ботами  */
-    Route::get('bots', 'BotController@getList');
-    Route::get('bot/{id}', 'BotController@get');
+    Route::middleware('auth:api')->get('/user', function (Request $request) {
+        return $request->user();
+    });
 
-    Route::post('bot', 'BotController@create');
+    Route::group([ 'middleware' => ['api'],
+    'prefix' => 'auth'], static function ($router) {
+      Route::post('login', 'AuthController@login');
+      Route::post('register', 'AuthController@register');
+      Route::group(['middleware' => 'jwt.verify'], static function($router){
+        Route::post('logout', 'AuthController@logout');
+        Route::post('refresh', 'AuthController@refresh');
+        Route::post('me', 'AuthController@me');
+      });
+    });
 
-    Route::put('bot/{id}', 'BotController@update');
-    Route::delete('bot/{id}', 'BotController@delete');
+    Route::group([ 'middleware' => ['api'],
+    'prefix' => 'methods'], static function ($router) {
+      Route::group(['middleware' => 'jwt.verify'], static function($router){
+        /*  События с ботами  */
+        Route::get('bots', 'BotController@getList');
+        Route::get('bot/{id}', 'BotController@get');
 
-    /*  События с хранилищами  */
-    Route::get('storages', 'StorageController@getList');
-    Route::get('storage/{id}', 'StorageController@get');
+        Route::post('bot', 'BotController@create');
 
-    Route::post('storage', 'StorageController@create');
-    Route::post('storage-custom', 'StorageController@createCustomStorage');
+        Route::put('bot/{id}', 'BotController@update');
+        Route::delete('bot/{id}', 'BotController@delete');
 
-    Route::put('storage/{id}', 'StorageController@update');
-    Route::delete('storage/{id}', 'StorageController@delete');
-});
+        /*  События с хранилищами  */
+        Route::get('storages', 'StorageController@getList');
+        Route::get('storage/{id}', 'StorageController@get');
+
+        Route::post('storage', 'StorageController@create');
+        Route::post('storage-custom', 'StorageController@createCustomStorage');
+
+        Route::put('storage/{id}', 'StorageController@update');
+        Route::delete('storage/{id}', 'StorageController@delete');
+      });
+    });

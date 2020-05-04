@@ -14,34 +14,10 @@ class AuthController extends Controller
 {
   /**
   *
-  * @OA\Post(
-  *     path="/api/auth/login",
-  *     tags={"Auth"},
-  *     @OA\Parameter(
-  *         name="email",
-  *         in="query",
-  *         description="Почта пользователя",
-  *         required=true,
-  *         @OA\Schema(
-  *             type="string",
-  *             format="string32"
-  *         )
-  *     ),
-  *     @OA\Parameter(
-  *         name="password",
-  *         in="query",
-  *         description="Пароль пользователя",
-  *         required=true,
-  *         @OA\Schema(
-  *             type="string",
-  *             format="string32"
-  *         )
-  *     ),
-  *     @OA\Response(response="200", description="Авторизует пользователя")
-  * )
   *
   * @OA\Post(
   *     path="/api/auth/registration",
+  *     summary="Регистрация пользователя",
   *     tags={"Auth"},
   *     @OA\Parameter(
   *         name="name",
@@ -77,17 +53,47 @@ class AuthController extends Controller
   * )
   *
   * @OA\Post(
-  *     path="/api/auth/refresh",
+  *     path="/api/auth/login",
+  *     summary="Авторизация пользователя",
   *     tags={"Auth"},
-  *     @OA\Response(response="200", description="Обновляет токен пользователя")
+  *     @OA\Parameter(
+  *         name="email",
+  *         in="query",
+  *         description="Почта пользователя",
+  *         required=true,
+  *         @OA\Schema(
+  *             type="string",
+  *             format="string32"
+  *         )
+  *     ),
+  *     @OA\Parameter(
+  *         name="password",
+  *         in="query",
+  *         description="Пароль пользователя",
+  *         required=true,
+  *         @OA\Schema(
+  *             type="string",
+  *             format="string32"
+  *         )
+  *     ),
+  *     @OA\Response(response="200", description="Авторизует пользователя")
   * )
   *
   * @OA\Post(
   *     path="/api/auth/me",
+  *     summary="Получение информации о пользователе",
   *     tags={"Auth"},
-  *     @OA\Response(response="200", description="Выводит информацию о пользователе")
+  *     @OA\Response(response="200", description="Выводит информацию о пользователе"),
+  *     security={{"apiAuth": {}}}
   * )
   *
+  * @OA\Post(
+  *     path="/api/auth/refresh",
+  *     summary="Получение долгоживущего токена пользователя",
+  *     tags={"Auth"},
+  *     @OA\Response(response="200", description="Обновляет токен пользователя"),
+  *     security={{"apiAuth": {}}}
+  * )
   */
   public function __construct()
   {

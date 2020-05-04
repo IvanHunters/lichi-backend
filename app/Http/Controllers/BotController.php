@@ -1,21 +1,31 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\User;
+use App\Http\Requests\RegisterRequest;
+use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use JWTAuth;
+use Hash;
+use App\User;
+use Tymon\JWTAuth\Exceptions\JWTException;
 use App\Models\Bot;
+
 class BotController extends Controller
 {
   /**
   *
   * @OA\Get(
-  *     path="/api/auth/method/bots",
+  *     path="/api/methods/bots",
+  *     summary="Вывести всех ботов пользователя",
   *     tags={"Bots"},
-  *     @OA\Response(response="200", description="Выводит ботов у пользователя")
+  *     @OA\Response(response="200", description="Выводит ботов у пользователя"),
+  *     security={{"apiAuth": {}}}
   * )
   *
   * @OA\Get(
-  *     path="/api/auth/method/bot",
+  *     path="/api/methods/bot/{id}",
+  *     summary="Вывести информацию о боте пользователя",
   *     tags={"Bots"},
   *     @OA\Parameter(
   *         name="id",
@@ -27,11 +37,13 @@ class BotController extends Controller
   *             format="int64"
   *         )
   *     ),
-  *     @OA\Response(response="200", description="Выводит информацию о боте пользователя")
+  *     @OA\Response(response="200", description="Выводит информацию о боте пользователя"),
+  *     security={{"apiAuth": {}}}
   * )
   *
   * @OA\Post(
-  *     path="/api/auth/method/bot",
+  *     path="/api/methods/bot",
+  *     summary="Создать бота пользователя",
   *     tags={"Bots"},
   *     @OA\Parameter(
   *         name="name",
@@ -66,11 +78,13 @@ class BotController extends Controller
   *         ),
   *         style="form"
   *     ),
-  *     @OA\Response(response="200", description="Создает бота пользователя")
+  *     @OA\Response(response="200", description="Создает бота пользователя"),
+  *     security={{"apiAuth": {}}}
   * )
   *
   * @OA\Put(
-  *     path="/api/auth/method/bot",
+  *     path="/api/methods/bot/{id}",
+  *     summary="Изменить бота пользователя",
   *     tags={"Bots"},
   *     @OA\Parameter(
   *         name="id",
@@ -212,12 +226,14 @@ class BotController extends Controller
   *             format="string32"
   *         )
   *     ),
-  *     @OA\Response(response="200", description="Обновляет информацию о боте пользователя")
+  *     @OA\Response(response="200", description="Обновляет информацию о боте пользователя"),
+  *     security={{"apiAuth": {}}}
   * )
   *
   * @OA\Delete(
   *     tags={"Bots"},
-  *     path="/api/auth/method/bot",
+  *     summary="Удалить бота пользователя",
+  *     path="/api/methods/bot/{id}",
   *     @OA\Parameter(
   *         name="id",
   *         in="path",
@@ -228,13 +244,22 @@ class BotController extends Controller
   *             format="int64"
   *         )
   *     ),
-  *     @OA\Response(response="200", description="Удаляет бота пользователя")
+  *     @OA\Response(response="200", description="Удаляет бота пользователя"),
+  *     security={{"apiAuth": {}}}
   * )
   */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'registration']]);
-        $this->user = auth()->user();
+      $this->data = [
+      'status' => false,
+      'code' => 401,
+      'data' => null,
+      'err' => [
+      'code' => 1,
+      'message' => 'Unauthorized'
+      ]
+      ];
+      $this->user = auth()->user();
     }
 
     public function get($id)
@@ -243,7 +268,7 @@ class BotController extends Controller
         if($bot->count() < 1)
         {
           $response = ['status'=>'error', 'code'=>'BOT_NOT_EXIST'];
-          return response()->json($response);
+          return response()->json($response, 500);
         }
         $bot = $bot->first();
         return response()->json($bot);
@@ -255,7 +280,7 @@ class BotController extends Controller
       if($bot->count() < 1)
       {
         $response = ['status'=>'error', 'code'=>'BOTS_NOT_EXISTS'];
-        return response()->json($response);
+        return response()->json($response, 500);
       }
       $bot = $bot->get(['id', 'name']);
       return response()->json($bot);
@@ -282,7 +307,7 @@ class BotController extends Controller
       if($bot->count() < 1)
       {
         $response = ['status'=>'error', 'code'=>'BOT_NOT_EXIST', 'items'=>$bot];
-        return response()->json($response);
+        return response()->json($response, 500);
       }
 
       $bot = $bot->first();
@@ -299,7 +324,7 @@ class BotController extends Controller
       if($bot->count() < 1)
       {
         $response = ['status'=>'error', 'code'=>'BOTS_NOT_EXISTS'];
-        return response()->json($response);
+        return response()->json($response, 500);
       }
       $bot->delete();
       $response = ['status'=>'ok', 'code'=>'SUCCESS'];
