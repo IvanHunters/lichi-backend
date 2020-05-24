@@ -87,8 +87,39 @@
                 }
             }
         },
-        "/api/auth/me": {
+        "/api/auth/change_password": {
             "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Изменение пароля пользователя",
+                "operationId": "App\\Http\\Controllers\\AuthController::__construct",
+                "parameters": [
+                    {
+                        "name": "new_password",
+                        "in": "query",
+                        "description": "Новый пароль пользователя",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "string32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Изменяет пароль пользователя"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/me": {
+            "get": {
                 "tags": [
                     "Auth"
                 ],
@@ -202,16 +233,6 @@
                         }
                     },
                     {
-                        "name": "preset_id",
-                        "in": "query",
-                        "description": "id шаблона",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int32"
-                        }
-                    },
-                    {
                         "name": "name",
                         "in": "query",
                         "description": "Имя бота",
@@ -255,36 +276,6 @@
                         "name": "vk_token_group",
                         "in": "query",
                         "description": "Токен группы Вконтакте",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "format": "string32"
-                        }
-                    },
-                    {
-                        "name": "vk_token_user",
-                        "in": "query",
-                        "description": "Токен пользователя Вконтакте",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "format": "string32"
-                        }
-                    },
-                    {
-                        "name": "vk_token_confirm",
-                        "in": "query",
-                        "description": "Confirm-токен для группы Вконтакте",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "format": "string32"
-                        }
-                    },
-                    {
-                        "name": "vk_secret_key",
-                        "in": "query",
-                        "description": "Секретный ключ для Вконтакте",
                         "required": false,
                         "schema": {
                             "type": "string",
@@ -394,13 +385,178 @@
                             "type": "integer",
                             "format": "int64"
                         }
-                    },
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Создает бота пользователя"
+                    }
+                },
+                "security": [
                     {
-                        "name": "preset_id",
-                        "in": "query",
-                        "description": "id пресета бота",
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/methods/bot/{id}/handler": {
+            "get": {
+                "tags": [
+                    "Bots"
+                ],
+                "summary": "Получает обработчик в виде JSON для бота пользователя",
+                "operationId": "App\\Http\\Controllers\\BotController::__construct",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id бота",
                         "required": true,
                         "style": "form",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Bots"
+                ],
+                "summary": "Добавляет или изменяет обработчик бота пользователя",
+                "operationId": "App\\Http\\Controllers\\BotController::__construct",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id бота",
+                        "required": true,
+                        "style": "form",
+                        "schema": {
+                            "type": "integer",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    {
+                        "name": "handler",
+                        "in": "query",
+                        "description": "обработчик бота",
+                        "required": true,
+                        "style": "form",
+                        "schema": {
+                            "type": "string",
+                            "items": {
+                                "type": "json"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/methods/mailing": {
+            "get": {
+                "tags": [
+                    "Mailing"
+                ],
+                "summary": "Вывести все рассылки пользователя",
+                "operationId": "App\\Http\\Controllers\\MailingController::__construct",
+                "responses": {
+                    "200": {
+                        "description": "Выводит рассылки пользователя"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Mailing"
+                ],
+                "summary": "Создать рассылку пользователя",
+                "operationId": "App\\Http\\Controllers\\MailingController::__construct",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Имя рассылки",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "string32"
+                        }
+                    },
+                    {
+                        "name": "bot_id",
+                        "in": "query",
+                        "description": "id бота",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "platform",
+                        "in": "query",
+                        "description": "Платформа для рассылки [vk, tg, vb]",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "string32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Создает рассылку"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/methods/mailing/{id}": {
+            "get": {
+                "tags": [
+                    "Mailing"
+                ],
+                "summary": "Вывести информацию о рассылке пользователя",
+                "operationId": "App\\Http\\Controllers\\MailingController::__construct",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id рассылки",
+                        "required": true,
                         "schema": {
                             "type": "integer",
                             "format": "int64"
@@ -409,7 +565,290 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Создает бота пользователя"
+                        "description": "Выводит информацию о рассылке пользователя"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Mailing"
+                ],
+                "summary": "Изменить рассылку пользователя",
+                "operationId": "App\\Http\\Controllers\\MailingController::__construct",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id рассылки",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "bot_id",
+                        "in": "query",
+                        "description": "id бота",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "platform",
+                        "in": "query",
+                        "description": "Платформа для рассылки [vk, tg, vb]",
+                        "schema": {
+                            "type": "string",
+                            "format": "string32"
+                        }
+                    },
+                    {
+                        "name": "media_id",
+                        "in": "query",
+                        "description": "id Медиафайла",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "text_message",
+                        "in": "query",
+                        "description": "Текст сообщения",
+                        "schema": {
+                            "type": "string",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Статус рассылки [0-1]",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Изменяет хранилище пользователя (только пользовательское)"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Mailing"
+                ],
+                "summary": "Удалить рассылку пользователя",
+                "operationId": "App\\Http\\Controllers\\MailingController::__construct",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id рассылки",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Удаляет хранилище пользователя"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/methods/mailing/bot/{id}": {
+            "get": {
+                "tags": [
+                    "Mailing"
+                ],
+                "summary": "Вывести информацию о рассылках бота",
+                "operationId": "App\\Http\\Controllers\\MailingController::__construct",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id бота",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Выводит информацию о рассылках пользователя"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/methods/media": {
+            "get": {
+                "tags": [
+                    "Media"
+                ],
+                "summary": "Вывести все файлы пользователя",
+                "operationId": "App\\Http\\Controllers\\MediaController::__construct",
+                "responses": {
+                    "200": {
+                        "description": "Выводит файлы пользователя"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Media"
+                ],
+                "summary": "Добавить файл в медиабиблиотеку пользователя",
+                "operationId": "App\\Http\\Controllers\\MediaController::__construct",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "file"
+                                ],
+                                "properties": {
+                                    "file": {
+                                        "description": "Файл для загрузки",
+                                        "type": "file",
+                                        "format": "file"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Добавляет файл в медиабиблиотеку пользователя"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/methods/media/{id}": {
+            "get": {
+                "tags": [
+                    "Media"
+                ],
+                "summary": "Вывести файл пользователя",
+                "operationId": "App\\Http\\Controllers\\MediaController::__construct",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id файла пользователя",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "string64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Выводит файл из медиабиблиотеки пользователя"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Media"
+                ],
+                "summary": "изменить имя файла в медиабиблиотеке",
+                "operationId": "App\\Http\\Controllers\\MediaController::__construct",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id файла пользователя",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "новое имя файла пользователя",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "string32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Добавляет файл в медиабиблиотеку пользователя"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Media"
+                ],
+                "summary": "Удалить файл из медиабиблиотеки пользователя",
+                "operationId": "App\\Http\\Controllers\\MediaController::__construct",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id файла для удаления",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Удаляет файл из медиабиблиотеки пользователя"
                     }
                 },
                 "security": [
@@ -625,6 +1064,16 @@
                             "type": "string",
                             "format": "string32"
                         }
+                    },
+                    {
+                        "name": "base",
+                        "in": "query",
+                        "description": "Вид базы данных ['pgsql', 'mysql', 'sqlite']",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "string32"
+                        }
                     }
                 ],
                 "responses": {
@@ -664,6 +1113,14 @@
         {
             "name": "Bots",
             "description": "Работа с ботами"
+        },
+        {
+            "name": "Media",
+            "description": "Работа с медиабиблиотекой"
+        },
+        {
+            "name": "Mailing",
+            "description": "Работа с рассылкой"
         }
     ]
 }

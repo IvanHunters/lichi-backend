@@ -1,13 +1,14 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\User;
 use App\Http\Requests\RegisterRequest;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use JWTAuth;
 use Hash;
-use App\User;
 use Tymon\JWTAuth\Exceptions\JWTException;
 
 class AuthController extends Controller
@@ -80,6 +81,24 @@ class AuthController extends Controller
   * )
   *
   * @OA\Post(
+  *     path="/api/auth/change_password",
+  *     summary="Изменение пароля пользователя",
+  *     tags={"Auth"},
+  *     @OA\Parameter(
+  *         name="new_password",
+  *         in="query",
+  *         description="Новый пароль пользователя",
+  *         required=true,
+  *         @OA\Schema(
+  *             type="string",
+  *             format="string32"
+  *         )
+  *     ),
+  *     @OA\Response(response="200", description="Изменяет пароль пользователя"),
+  *     security={{"apiAuth": {}}}
+  * )
+  *
+  * @OA\Get(
   *     path="/api/auth/me",
   *     summary="Получение информации о пользователе",
   *     tags={"Auth"},
@@ -138,6 +157,51 @@ class AuthController extends Controller
        return response()->json($this->data, $this->data['code']);
      }
 
+     public function login_vk(Request $request){
+       $url = "http://lichi-social.ru/auth/vk";
+       $secret = "f2BeXyxevyAuauCSe5t2";
+       $client = 7448703;
+       $vk_token = $request->access_token;
+       $user_id = $request->user_id;
+
+       $userData = User::where('vk_id', $user_id);
+
+       if ($userData->count() == 0) {
+         $user = new User();
+         $user->name = "User";
+         $user->email = "$user_id@ya.ru";
+         $user->password = Hash::make($user_id."password_vk");
+         $user->vk_id = $user_id;
+         $user->vk_token = $vk_token;
+         $user->fb_id = 0;
+         $user->ggl_id = 0;
+         $user->save();
+
+         $token = JWTAuth::attempt(['email'=>$user->email, 'password'=>$user->vk_id."password_vk"]);
+
+         $this->data = [
+           'status' => true,
+           'code' => 200,
+           'data' => [
+             '_token' => $token
+           ],
+           'err' => null
+          ];
+       }else{
+         $userData = $userData->first();
+         $token = JWTAuth::attempt(['email'=>$userData->email, 'password'=>$userData->vk_id."password_vk"]);
+         $this->data = [
+           'status' => true,
+           'code' => 200,
+           'data' => [
+             '_token' => $token
+           ],
+           'err' => null
+         ];
+       }
+       return response()->json($this->data);
+     }
+
     /**
      * User registration
      */
@@ -151,6 +215,10 @@ class AuthController extends Controller
         $user->name = $name;
         $user->email = $email;
         $user->password = Hash::make($password);
+        $user->vk_id = 0;
+        $user->vk_token = 'none';
+        $user->fb_id = 0;
+        $user->ggl_id = 0;
         $user->save();
 
         return response()->json(['message' => 'Successfully registration!']);
@@ -164,13 +232,13 @@ class AuthController extends Controller
      public function me(): JsonResponse
      {
      $this->data = [
-     'status' => true,
-     'code' => 200,
-     'data' => [
-     'User' => auth()->user()
-     ],
-     'err' => null
-     ];
+       'status' => true,
+       'code' => 200,
+       'data' => [
+         'User' => auth()->user()
+        ],
+        'err' => null
+      ];
      return response()->json($this->data);
      }
 
@@ -204,5 +272,17 @@ class AuthController extends Controller
           'err' => null
         ];
         return response()->json($data, 200);
+      }
+
+      public function change_password(Request $req)
+      {
+
+          $password = $req->new_password;
+
+          $user = User::where('id', auth()->user()->id);
+          $user->password = Hash::make($password);
+          $user->save();
+
+          return response()->json(['message' => 'Successfully change password']);
       }
 }

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "7e4352be609a5b8d6919112d6c70eec7",
+    "content-hash": "c71c27eff9eb8b6de3dd607aab25a49f",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -1104,6 +1104,76 @@
             "time": "2019-07-01T23:21:34+00:00"
         },
         {
+            "name": "intervention/image",
+            "version": "2.5.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Intervention/image.git",
+                "reference": "abbf18d5ab8367f96b3205ca3c89fb2fa598c69e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Intervention/image/zipball/abbf18d5ab8367f96b3205ca3c89fb2fa598c69e",
+                "reference": "abbf18d5ab8367f96b3205ca3c89fb2fa598c69e",
+                "shasum": ""
+            },
+            "require": {
+                "ext-fileinfo": "*",
+                "guzzlehttp/psr7": "~1.1",
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "~0.9.2",
+                "phpunit/phpunit": "^4.8 || ^5.7"
+            },
+            "suggest": {
+                "ext-gd": "to use GD library based image processing.",
+                "ext-imagick": "to use Imagick based image processing.",
+                "intervention/imagecache": "Caching extension for the Intervention Image library"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.4-dev"
+                },
+                "laravel": {
+                    "providers": [
+                        "Intervention\\Image\\ImageServiceProvider"
+                    ],
+                    "aliases": {
+                        "Image": "Intervention\\Image\\Facades\\Image"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Intervention\\Image\\": "src/Intervention/Image"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Oliver Vogel",
+                    "email": "oliver@olivervogel.com",
+                    "homepage": "http://olivervogel.com/"
+                }
+            ],
+            "description": "Image handling and manipulation library with support for Laravel integration",
+            "homepage": "http://image.intervention.io/",
+            "keywords": [
+                "gd",
+                "image",
+                "imagick",
+                "laravel",
+                "thumbnail",
+                "watermark"
+            ],
+            "time": "2019-11-02T09:15:47+00:00"
+        },
+        {
             "name": "laravel/framework",
             "version": "v7.9.2",
             "source": {
@@ -1586,6 +1656,47 @@
                 "storage"
             ],
             "time": "2020-04-16T13:21:26+00:00"
+        },
+        {
+            "name": "lichi/core",
+            "version": "v1.0.8",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/IvanHunters/Lichi_core.git",
+                "reference": "246a34e362252d4698c35fc7cbc8348d0e34c33f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/IvanHunters/Lichi_core/zipball/246a34e362252d4698c35fc7cbc8348d0e34c33f",
+                "reference": "246a34e362252d4698c35fc7cbc8348d0e34c33f",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Lichi\\VK\\": "core/VK/",
+                    "Lichi\\TG\\": "core/TG/",
+                    "Lichi\\VB\\": "core/VB/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ivan Okhotnikov",
+                    "email": "ohotnikovivan@yandex.ru",
+                    "homepage": "https://vk.com/id145567397",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Core for lichi Framework",
+            "homepage": "https://github.com/IvanHunters/Lichi_core",
+            "keywords": [
+                "lichi"
+            ],
+            "time": "2020-05-09T20:17:08+00:00"
         },
         {
             "name": "monolog/monolog",

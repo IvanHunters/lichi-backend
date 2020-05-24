@@ -10,12 +10,9 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
 Auth::routes();
 
-Route::get('/home', 'HomeController@index');
 use BeyondCode\LaravelWebSockets\Facades\WebSocketsRouter;
 WebSocketsRouter::webSocket('/websocket', \App\Events\WebsocketHandler::class);
+
+Route::get('/media/{id}/{file_id}', 'MediaController@get');

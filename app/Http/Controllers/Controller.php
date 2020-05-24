@@ -23,6 +23,14 @@ class Controller extends BaseController
     *   name="Bots",
     *   description="Работа с ботами"
     * )
+    * @OA\Tag(
+    *   name="Media",
+    *   description="Работа с медиабиблиотекой"
+    * )
+    * @OA\Tag(
+    *   name="Mailing",
+    *   description="Работа с рассылкой"
+    * )
     * @OA\SecurityScheme(
     *     type="http",
     *     description="Login with email and password to get the authentication token",

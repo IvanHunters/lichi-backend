@@ -20,19 +20,25 @@ use Illuminate\Support\Facades\Route;
 
     Route::group([ 'middleware' => ['api'],
     'prefix' => 'auth'], static function ($router) {
+      Route::post('vk', 'AuthController@login_vk');
       Route::post('login', 'AuthController@login');
-      Route::post('register', 'AuthController@register');
+      Route::post('registration', 'AuthController@registration');
+
       Route::group(['middleware' => 'jwt.verify'], static function($router){
         Route::post('logout', 'AuthController@logout');
         Route::post('refresh', 'AuthController@refresh');
-        Route::post('me', 'AuthController@me');
+        Route::get('me', 'AuthController@me');
+        Route::post('change_password', 'AuthController@change_password');
       });
+
     });
 
     Route::group([ 'middleware' => ['api'],
     'prefix' => 'methods'], static function ($router) {
       Route::group(['middleware' => 'jwt.verify'], static function($router){
         /*  События с ботами  */
+        Route::get('actions', 'ActionsController@index');
+
         Route::get('bots', 'BotController@getList');
         Route::get('bot/{id}', 'BotController@get');
 
@@ -40,6 +46,13 @@ use Illuminate\Support\Facades\Route;
 
         Route::put('bot/{id}', 'BotController@update');
         Route::delete('bot/{id}', 'BotController@delete');
+
+        /*Обработчики бота*/
+        Route::get('bot/{id}/handler', 'BotController@getHandler');
+        Route::post('bot/{id}/handler', 'BotController@setHandler');
+
+        Route::post('bot/{id}/connect', 'BotController@connect');
+
 
         /*  События с хранилищами  */
         Route::get('storages', 'StorageController@getList');
@@ -50,5 +63,28 @@ use Illuminate\Support\Facades\Route;
 
         Route::put('storage/{id}', 'StorageController@update');
         Route::delete('storage/{id}', 'StorageController@delete');
+
+        /*  События с медиабиблиотекой  */
+        Route::get('media', 'MediaController@getList');
+
+        Route::post('media', 'MediaController@create');
+
+        Route::put('media/{id}', 'MediaController@update');
+        Route::delete('media/{id}', 'MediaController@delete');
+
+        /*  События с рассылкой  */
+        Route::get('mailing', 'MailingController@getList');
+        Route::get('mailing/{id}', 'MailingController@get');
+        Route::get('mailing/bot/{id}', 'MailingController@getForBot');
+
+        Route::post('mailing', 'MailingController@create');
+
+        Route::put('mailing/{id}', 'MailingController@update');
+        Route::delete('mailing/{id}', 'MailingController@delete');
+
       });
+    });
+    Route::group([ 'middleware' => ['api'],
+    'prefix' => 'webhook'], static function ($router) {
+      Route::post('{hash_name}/{platform}', 'ActionsController@bot_handler');
     });

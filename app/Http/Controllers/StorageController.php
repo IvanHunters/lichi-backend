@@ -122,6 +122,16 @@ class StorageController extends Controller
     *             format="string32"
     *         )
     *     ),
+    *     @OA\Parameter(
+    *         name="base",
+    *         in="query",
+    *         description="Вид базы данных ['pgsql', 'mysql', 'sqlite']",
+    *         required=true,
+    *         @OA\Schema(
+    *             type="string",
+    *             format="string32"
+    *         )
+    *     ),
     *     @OA\Response(response="200", description="Создает пользовательское хранилище"),
     *     security={{"apiAuth": {}}}
     * )
@@ -180,7 +190,7 @@ class StorageController extends Controller
         $storage = StorageUser::where('id',$id)->where('creator_id',$this->user->id);
         if($storage->count() < 1)
         {
-          $response = ['status'=>'error', 'code'=>'STORAGE_NOT_EXIST'];
+          $response = ['status'=>'error', 'code'=>'STORAGE_NOT_EXIST', 'message'=>['en'=>'Storage not exist', 'ru'=>'Хранилище не существует']];
           return response()->json($response, 500);
         }
         $storage = $storage->first();
@@ -193,16 +203,26 @@ class StorageController extends Controller
       $storage = StorageUser::where('creator_id',$this->user->id);
       if($storage->count() < 1)
       {
-        $response = ['status'=>'error', 'code'=>'STORAGES_NOT_EXISTS'];
+        $response = ['status'=>'error', 'code'=>'STORAGE_NOT_EXIST', 'message'=>['en'=>'Storage not exist', 'ru'=>'Хранилище не существует']];
         return response()->json($response, 500);
       }
       $storage = $storage->get(['id', 'name']);
       $response = ['status'=>'ok', 'code'=>'SUCCESS', 'items'=>$storage];
-      return response()->json($storage);
+      return response()->json($response);
     }
 
     public function createCustomStorage(Request $req)
     {
+      foreach($req->only(['name', 'host', 'port', 'database', 'username', 'base']) as $value){
+        if(is_null($value))
+        {
+          $response = ['status'=>'error', 'code'=>'PARAMS_CANT_BE_NULL', 'message'=>['en'=>'Params can not be null', 'ru'=>'Переданные параметры не должны быть пустыми']];
+          return response()->json($response, 500);
+        }
+      }
+
+        $aprove_base = ['pgsql', 'mysql', 'sqlite'];
+
         $storage = new StorageUser;
         $storage->name = $req->name;
         $storage->creator_id = $this->user->id;
@@ -213,24 +233,46 @@ class StorageController extends Controller
         $storage->database = $req->database;
         $storage->username = $req->username;
         $storage->password = $req->password;
+
+        $storage->base = $req->base;
+
+        if(!in_array($req->base, $aprove_base)){
+          $response = ['status'=>'error', 'code'=>'BASE_NOT_APROVE', 'message'=>['en'=>'Incorrect type base', 'ru'=>'Вид базы данных не корректен']];
+          return response()->json($response, 500);
+        }
+
         try
         {
-          mysqli_connect($storage->host.":".$storage->port, $storage->username, $storage->password, $storage->database);
+          $dbcon = new \PDO($this->base.':host='.$storage->host.":".$storage->port.';dbname='.$storage->database, $storage->username, $storage->password);
+          $dbcon->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         }catch(\ErrorException $e){
-            $response = ['status'=>'error', 'code'=>'CONNECTION_FOR_DATABASE_REFUSED'];
+            $response = ['status'=>'error', 'code'=>'CONNECTION_FOR_DATABASE_REFUSED', 'message'=>['en'=>'Connection for database was refused', 'ru'=>'Соединение с базой данных не удалось']];
             return response()->json($response, 500);
         }
+        $dbcon->exec("CREATE TABLE `lichi_users` ( `user_id` VARCHAR(100) NOT NULL ,  `platform` VARCHAR(100) NOT NULL ,  `status` INT NOT NULL DEFAULT '0' ,    UNIQUE  (`id`));");
+        $dbcon->exec("CREATE TABLE `lichi_requests` ( `user_id` VARCHAR(100) NOT NULL ,  `platform` VARCHAR(100) NOT NULL ,  `event` VARCHAR(10000) NOT NULL DEFAULT 'message_new' ,  `description` VARCHAR(10000) NOT NULL ,  `date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP );");
+        $dbcon->exec("CREATE TABLE `lichi_authorization` ( `user_id` VARCHAR(100) NOT NULL , `platform` VARCHAR(100) NOT NULL ,  `hash` VARCHAR(1000) NOT NULL ,    UNIQUE  (`user_id`));");
+
         $storage->save();
 
-        $response = ['status'=>'ok', 'code'=>'SUCCESS', 'items'=>['id'=>$storage->id,'name'=>$storage->name]];
+        $response = ['status'=>'ok', 'code'=>'SUCCESS', 'items'=>['id'=>$storage->id,'name'=>$storage->name], 'message'=>['en'=>'The storage was successfully created', 'ru'=>'Хранилище было успешно создано']];
         return response()->json($response);
     }
 
     public function create(Request $req)
     {
+      foreach($req->only(['name']) as $value){
+        if(is_null($value))
+        {
+          $response = ['status'=>'error', 'code'=>'PARAMS_CANT_BE_NULL', 'message'=>['en'=>'Params can not be null', 'ru'=>'Переданные параметры не должны быть пустыми']];
+          return response()->json($response, 500);
+        }
+      }
+
         $storage = new StorageUser;
 
         $storage->name = $req->name;
+        $storage->base = 'mysql';
         $storage->creator_id = $this->user->id;
 
         $this->begetResponse = $this->beget->addStorage();
@@ -238,29 +280,47 @@ class StorageController extends Controller
           $storage->database = $this->begetResponse['login'];
           $storage->username = $this->begetResponse['login'];
           $storage->password = $this->begetResponse['password'];
+          sleep(1);
+          $mysqli = new \mysqli("w999623p.beget.tech", $storage->username, $storage->password, $storage->database);
+          $mysqli->query("CREATE TABLE `lichi_users` ( `user_id` VARCHAR(100) NOT NULL ,  `platform` VARCHAR(100) NOT NULL ,  `status` INT NOT NULL DEFAULT '0' ,    UNIQUE  (`user_id`)) ENGINE = InnoDB;");
+          $mysqli->query("CREATE TABLE `lichi_requests` ( `user_id` VARCHAR(100) NOT NULL ,  `platform` VARCHAR(100) NOT NULL ,  `event` VARCHAR(10000) NOT NULL DEFAULT 'message_new' ,  `description` VARCHAR(10000) NOT NULL ,  `date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ) ENGINE = InnoDB;");
+          $mysqli->query("CREATE TABLE `lichi_authorization` ( `user_id` VARCHAR(100) NOT NULL , `platform` VARCHAR(100) NOT NULL ,  `hash` VARCHAR(1000) NOT NULL ,    UNIQUE  (`user_id`));");
+
           $storage->save();
-          $response = ['status'=>'ok', 'code'=>'SUCCESS', 'items'=>['id'=>$storage->id,'name'=>$storage->name]];
+          $response = ['status'=>'ok', 'code'=>'SUCCESS', 'items'=>['id'=>$storage->id,'name'=>$storage->name], 'message'=>['en'=>'The storage was successfully created', 'ru'=>'Хранилище было успешно создано']];
           return response()->json($response);
         }else{
-          $response = ['status'=>'error', 'code'=>'TRY_LATER_CREATE_STORAGE'];
+          $response = ['status'=>'error', 'code'=>'TRY_LATER_CREATE_STORAGE', 'message'=>['en'=>'Try later create storage', 'ru'=>'Повторите создание хранилища позже']];
           return response()->json($response, 500);
         }
     }
 
     public function update($id, Request $req)
     {
-      $storage = StorageUser::where('id',$id)->where('creator_id',$this->user->id)->where('type', '2');
+      foreach($req->only(['name', 'host', 'port', 'database', 'username', 'base']) as $value){
+        if(is_null($value))
+        {
+          $response = ['status'=>'error', 'code'=>'PARAMS_CANT_BE_NULL', 'message'=>['en'=>'Params can not be null', 'ru'=>'Переданные параметры не должны быть пустыми']];
+          return response()->json($response, 500);
+        }
+      }
+
+      $storage = StorageUser::where('id',$id)->where('creator_id',$this->user->id);
       if($storage->count() < 1)
       {
-        $response = ['status'=>'error', 'code'=>'STORAGE_NOT_EXIST', 'items'=>$storage];
+        $response = ['status'=>'error', 'code'=>'STORAGE_NOT_EXIST', 'message'=>['en'=>'Storage not exist', 'ru'=>'Хранилище не существует']];
         return response()->json($response, 500);
       }
 
       $storage = $storage->first();
-      foreach ($req->input() as $key => $value)  $storage->{$key} = $value;
+      foreach ($req->only(['name', 'host', 'port', 'database', 'username', 'base']) as $key => $value)
+      {
+
+        $storage->{$key} = $value;
+      }
       $storage->save();
 
-      $response = ['status'=>'ok', 'code'=>'SUCCESS', 'items'=>$storage];
+      $response = ['status'=>'ok', 'code'=>'SUCCESS', 'items'=>$storage, 'message'=>['en'=>'The storage was successfully updated', 'ru'=>'Хранилище было успешно обновлено']];
       return response()->json($response);
     }
 
@@ -269,14 +329,14 @@ class StorageController extends Controller
       $storage = StorageUser::where('id', $id)->where('creator_id',$this->user->id);
       if($storage->count() < 1)
       {
-        $response = ['status'=>'error', 'code'=>'STORAGES_NOT_EXISTS'];
+        $response = ['status'=>'error', 'code'=>'STORAGES_NOT_EXISTS', 'message'=>['en'=>'Storage not exist', 'ru'=>'Хранилище не существует']];
         return response()->json($response, 500);
       }
       $storage = $storage->first();
       $suffix = explode("_",$storage->database)[1];
       $this->beget->dropStorage($suffix);
       $storage->delete();
-      $response = ['status'=>'ok', 'code'=>'SUCCESS'];
+      $response = ['status'=>'ok', 'code'=>'SUCCESS', 'message'=>['en'=>'The storage was successfully deleted', 'ru'=>'Хранилище было успешно удалено']];
       return response()->json($response);
     }
 }
