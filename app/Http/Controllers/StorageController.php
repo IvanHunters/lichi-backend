@@ -243,12 +243,13 @@ class StorageController extends Controller
 
         try
         {
-          $dbcon = new \PDO($this->base.':host='.$storage->host.":".$storage->port.';dbname='.$storage->database, $storage->username, $storage->password);
-          $dbcon->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+          $dbcon = new \PDO($req->base.':host='.$storage->host.":".$storage->port.';dbname='.$storage->database, $storage->username, $storage->password);
         }catch(\ErrorException $e){
             $response = ['status'=>'error', 'code'=>'CONNECTION_FOR_DATABASE_REFUSED', 'message'=>['en'=>'Connection for database was refused', 'ru'=>'Соединение с базой данных не удалось']];
             return response()->json($response, 500);
         }
+        $dbcon->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
         $dbcon->exec("CREATE TABLE `lichi_users` ( `user_id` VARCHAR(100) NOT NULL ,  `platform` VARCHAR(100) NOT NULL ,  `status` INT NOT NULL DEFAULT '0' ,    UNIQUE  (`id`));");
         $dbcon->exec("CREATE TABLE `lichi_requests` ( `user_id` VARCHAR(100) NOT NULL ,  `platform` VARCHAR(100) NOT NULL ,  `event` VARCHAR(10000) NOT NULL DEFAULT 'message_new' ,  `description` VARCHAR(10000) NOT NULL ,  `date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP );");
         $dbcon->exec("CREATE TABLE `lichi_authorization` ( `user_id` VARCHAR(100) NOT NULL , `platform` VARCHAR(100) NOT NULL ,  `hash` VARCHAR(1000) NOT NULL ,    UNIQUE  (`user_id`));");

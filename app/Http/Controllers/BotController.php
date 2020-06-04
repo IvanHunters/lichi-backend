@@ -333,7 +333,22 @@ class BotController extends Controller
         return response()->json($response, 500);
       }
       $bot = $bot->first();
-
+      if($platform != 'vk')
+      {
+        $token = $platform."_token";
+        if($bot->$token == '')
+        {
+          $response = ['status'=>'error', 'code'=>'TOKEN_ERROR', 'message'=>['en'=>'Token error', 'ru'=>'Ошибка токена']];
+          return response()->json($response, 500);
+        }
+      }else{
+        $token = $platform."_token_group";
+        if($bot->$token == '')
+        {
+          $response = ['status'=>'error', 'code'=>'TOKEN_ERROR', 'message'=>['en'=>'Token error', 'ru'=>'Ошибка токена']];
+          return response()->json($response, 500);
+        }
+      }
       $already_connected = $platform."_already_connected";
       $status = $platform."_status";
       $bot->$already_connected = 1;
@@ -512,6 +527,10 @@ class BotController extends Controller
       }
 
       $bot = $bot->first();
+      if($bot->handler_block == '1'){
+        $response = ['status'=>'error', 'code'=>'HANDLER_WAS_BLOCKED', 'message'=>['en'=>'Handler was blocked', 'ru'=>'Обновление обработчика было отключено']];
+        return response()->json($response, 500);
+      }
       $JsonParseCode = new JsonParseCode($id);
       $response = $JsonParseCode->set_handler($req->handler);
       if($response['status'] == 'error')

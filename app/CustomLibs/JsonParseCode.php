@@ -60,7 +60,7 @@ class JsonParseCode
 
         unset($array_chain[0]);
         sort($array_chain);
-        $this->handle_first[0] = '$user_info = $event_data->db->exq("SELECT * FROM lichi_users WHERE user_id = \'{$event_data->user_id}\' and platform=\'{$event_data->platform}\'");';
+        $this->handle_first[0] = '$user_info = $event_data->db->exq("SELECT status, user_id FROM lichi_users WHERE user_id = \'{$event_data->user_id}\' and platform=\'{$event_data->platform}\'");';
         $this->handle_first[1] = '$handle = false;';
         $this->handle_first[2][0] = 'if($user_info["count_rows"] == 0){';
         $this->handle_first[2][1][0] = '$event_data->db->exq("INSERT INTO lichi_users SET user_id = \'{$event_data->user_id}\', platform=\'{$event_data->platform}\'");';
@@ -159,7 +159,7 @@ class JsonParseCode
                   $data = MediaLib::where('id', $media)->first();
                   $file_path = storage_path("app".$data->path);
                   if($data->type == '1')
-                    $tmp_array[] = '       $media = $event_data->upload_photo("'.$file_path.'");';
+                    $tmp_array[] = '       $media = $event_data->upload_photo("'.$file_path.'", true, false);';
                   else
                     $tmp_array[] = '       $media = $event_data->upload_document("'.$file_path.'");';
                   $attach[] = '\'attachment\'=>$media';

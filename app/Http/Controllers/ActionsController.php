@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Bot;
 use App\Models\StorageUser;
 use App\CustomLibs\DatabaseLib;
+use Image;
+use File;
+use Response;
 
 class ActionsController extends Controller
 {
@@ -20,6 +23,7 @@ class ActionsController extends Controller
 
       public function bot_handler($hash_name, $platform, Request $req)
       {
+
         $bot = Bot::where('hash_name',$hash_name);
         if($bot->count() < 1)
         {
@@ -28,6 +32,7 @@ class ActionsController extends Controller
         }
 
         $bot = $bot->first();
+
         $type_r = mb_strtolower($platform)."_status";
         $namespase = "\Lichi\\$platform\Callback";
         $config["VK_TOKEN_USER"]    = $bot->vk_token_user;
@@ -40,19 +45,27 @@ class ActionsController extends Controller
 
 
 
+
         $event = new $namespase($config);
+
         $event->handler = Storage::disk("handlers")->get("{$bot->id}/handler.php");
         $event->id_bot = $bot->id;
         $event->status = $bot->$type_r;
         $event->platform = mb_strtolower($platform);
+
         $storage = StorageUser::where('id', $bot->storage_id)->first();
-        
+
         if($storage->base == '')
           $storage->base = 'mysql';
-
-        $event->db = new DatabaseLib($storage->base, $storage->host.":".$storage->port, $storage->username,  $storage->password, $storage->database);
-        try{
+        \DB::disconnect();
+        $event->db_connect = [$storage->base, $storage->host.":".$storage->port, $storage->username,  $storage->password, $storage->database];
+		try{
           $event->handler(function($event_data){
+            $event_data->db = new DatabaseLib($event_data->db_connect[0], $event_data->db_connect[1], $event_data->db_connect[2], $event_data->db_connect[3], $event_data->db_connect[4]);
+            if(is_null($event_data->db->pdo)){
+              $event_data->message_send("Истекло время ожидания от базы данных, повторите попытку позже");
+              exit();
+            }
             if($event_data->status == "1"){
               switch($event_data->type_event){
                 case 'message_new':
@@ -60,9 +73,10 @@ class ActionsController extends Controller
                 break;
               }
             }
-            $event_data->db->exq("INSERT INTO lichi_requests SET user_id = '{$event_data->user_id}', platform='{$event_data->platform}', event = '{$event_data->type_event}', description='{$event_data->text}'");
+            $event_data->db->close_connect();
+            //$event_data->db->exq("INSERT INTO lichi_requests SET user_id = '{$event_data->user_id}', platform='{$event_data->platform}', event = '{$event_data->type_event}', description='".addslashes($event_data->text)."'");
           });
-        }catch(\Throwable $e){;
+        }catch(\Throwable $e){
           Storage::disk("handlers")->append("{$event->id_bot}/handler.log", $e->getMessage()."| Строка -->".$e->getLine()."|  Файл -->".$e->getFile());
         }
       }

@@ -84,6 +84,7 @@ use Illuminate\Support\Facades\Route;
 
       });
     });
+
     Route::group([ 'middleware' => ['api'],
     'prefix' => 'webhook'], static function ($router) {
       Route::post('{hash_name}/{platform}', 'ActionsController@bot_handler');

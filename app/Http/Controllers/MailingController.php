@@ -11,7 +11,9 @@ use App\User;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use App\Models\Mailing;
 use App\Models\Bot;
+use App\Models\StorageUser;
 use App\Models\MediaLib;
+use App\CustomLibs\DatabaseLib;
 
 class MailingController extends Controller
 {
@@ -190,7 +192,86 @@ class MailingController extends Controller
         $this->user = auth()->user();
     }
 
-    public function start($bot_id, $message, $media_id){
+    public function start($platform, $bot_id, $message, $media_id){
+
+      header("Content-Encoding: none");
+      header("Connection: close");
+      $response = ['status'=>'ok', 'code'=>'SUCCESS', 'items'=>[]];
+      echo json_encode($response);
+
+      fastcgi_finish_request();
+
+      $bot = Bot::where('id', $bot_id)->first();
+      $storage_id = $bot->storage_id;
+
+      $storage = StorageUser::where('id', $storage_id)->first();
+      $PDO = new DatabaseLib($storage->base, $storage->host.":".$storage->port, $storage->username,  $storage->password, $storage->database);
+      $db_rows = $PDO->exq("SELECT * FROM lichi_users WHERE platform ='{$platform}'", true);
+      while($row = $db_rows->fetch()){
+        $users[] = $row['user_id'];
+      }
+      $namespase = "\Lichi\\".strtoupper($platform)."\Callback";
+      $config["VK_TOKEN_USER"]    = $bot->vk_token_user;
+      $config["VK_TOKEN_GROUP"]   = $bot->vk_token_group;
+      $config["VK_TOKEN_CONFIRM"] = $bot->vk_token_confirm;
+      $config["VK_SECRET_KEY"]    = $bot->vk_secret_key;
+      $config["TG_TOKEN"]         = $bot->tg_token;
+      $config["TG_PROXY"]         = $bot->tg_proxy;
+      $config["VB_TOKEN"]         = $bot->vb_token;
+
+
+
+      $event = new $namespase($config);
+      if($media_id != '0')
+      {
+      $data = MediaLib::where('id', $media_id)->first();
+      $file_path = storage_path("app".$data->path);
+
+      if($data->type == '1')
+        $media = $event->upload_photo($file_path, true, false);
+      else
+        $media = $event_data->upload_document($file_path);
+      }
+      \DB::disconnect();
+      if($platform == "vk")
+      {
+        $chunks = array_chunk($users, 100);
+        foreach($chunks as $chunk)
+        {
+          $users = implode(",", $chunk);
+          $arrayParams['user_ids'] = $users;
+          $arrayParams['message'] = $message;
+          $arrayParams['random_id'] = rand(1, 435345345345093);
+          if($media_id != '0')
+          {
+            $arrayParams['attachment'] = $media;
+          }
+          $data = $event->CallHowGroup('messages.send', $arrayParams);
+		      sleep(5);
+        }
+      }
+      else
+      {
+        $arrayParams = [];
+		    $i = 0;
+        foreach($users as $user)
+        {
+          $event->user_id = $user;
+          $event->chat_id = $user;
+
+          if($media_id != '0')
+          {
+            $arrayParams['attachment'] = $media;
+          }
+
+          $event->message_send($message, $arrayParams);
+		  $i++;
+		  if($i > 100){
+			sleep(1);
+			$i = 0;
+		  }
+        }
+      }
 
     }
 
@@ -284,7 +365,6 @@ class MailingController extends Controller
       }
 
       $mailing = Mailing::where('id',$id)->where('creator_id',$this->user->id);
-
       if($mailing->count() < 1)
       {
         $response = ['status'=>'error', 'code'=>'MAILING_NOT_EXIST', 'message'=>['en'=>'Mailing not exist', 'ru'=>'Рассылки не существует']];
@@ -292,6 +372,12 @@ class MailingController extends Controller
       }
 
       $mailing = $mailing->first();
+
+      if($mailing->status == '3'){
+        $response = ['status'=>'error', 'code'=>'MAILING_ALREADU_RUN', 'message'=>['en'=>'Mailing already run, please waiting when was stopped', 'ru'=>'Рассылки уже запущена, подождите пока она завершится!']];
+        return response()->json($response, 500);
+      }
+
       foreach ($req->only(['name', 'bot_id', 'status', 'media_id', 'text_message', 'platform']) as $key => $value)
       {
         if($key == 'bot_id' && Bot::where('id', $value)->where('creator_id', $this->user->id)->count() == 0)
@@ -323,6 +409,16 @@ class MailingController extends Controller
       }
       $mailing->save();
 
+      if($mailing->status == '1')
+      {
+        $mailing->status = '3';
+        $mailing->save();
+
+        $this->start($mailing->platform, $mailing->bot_id, $mailing->text_message, $mailing->media_id);
+        \DB::reconnect();
+        $mailing->status = '0';
+        $mailing->save();
+      }
       $response = ['status'=>'ok', 'code'=>'SUCCESS', 'items'=>$mailing, 'message'=>['en'=>'The mailer was successfully updated', 'ru'=>'Рассылка была успешно обновлена']];
       return response()->json($response);
     }
