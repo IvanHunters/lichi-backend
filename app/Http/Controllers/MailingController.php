@@ -206,10 +206,8 @@ class MailingController extends Controller
 
       $storage = StorageUser::where('id', $storage_id)->first();
       $PDO = new DatabaseLib($storage->base, $storage->host.":".$storage->port, $storage->username,  $storage->password, $storage->database);
-      $db_rows = $PDO->exq("SELECT * FROM lichi_users WHERE platform ='{$platform}'", true);
-      while($row = $db_rows->fetch()){
-        $users[] = $row['user_id'];
-      }
+      $rows = $PDO->exq("SELECT * FROM lichi_users WHERE platform ='{$platform}'", true);
+
       $namespase = "\Lichi\\".strtoupper($platform)."\Callback";
       $config["VK_TOKEN_USER"]    = $bot->vk_token_user;
       $config["VK_TOKEN_GROUP"]   = $bot->vk_token_group;
@@ -218,8 +216,6 @@ class MailingController extends Controller
       $config["TG_TOKEN"]         = $bot->tg_token;
       $config["TG_PROXY"]         = $bot->tg_proxy;
       $config["VB_TOKEN"]         = $bot->vb_token;
-
-
 
       $event = new $namespase($config);
       if($media_id != '0')
@@ -233,45 +229,76 @@ class MailingController extends Controller
         $media = $event_data->upload_document($file_path);
       }
       \DB::disconnect();
-      if($platform == "vk")
-      {
-        $chunks = array_chunk($users, 100);
-        foreach($chunks as $chunk)
-        {
-          $users = implode(",", $chunk);
+
+      $users = [];
+
+      while($row = $rows['result']->fetch()){
+        if(count($users) == 100 && $platform == "vk"){
+          $tokens =
+          ['be5ca1c0afa05292c8ac98e21b97f29955109bc85c6fc456e6952212330389fd852782a0221bf405353ab',
+          '01a326440d90cb1cac7148a461a43c65e7e568ef02ab92ad082ef7192ec914565a69270e5473f1dc5096c',
+          'f5d012ce4de75908f56f3b2a4dcfde7c1dd916a2befb56ed5fb9aa643d82ec6c7930a5da041647101cb8b',
+          '8795f27758ee78970b66255b5b0ec8a989c5bbaf5fa7f8dcf4490e3df9bd2fa349f6dad5664299ae6005b',
+          '8b1e1350f097180c96c777869c881afd96322fb2c862c2891bcd9286a6a1f43f0d5507a30c9d0231fca25',
+          'd3d21592436c6824f7615e4067e8d0390940dec49e11c7f7121b92f6931816fc378e32df0e452e97d2c4a',
+          'ca1f865df7d3992477841058cc854595752eefcce73f54142b860943fc9447bf584fea6e5d4b6a0a8f9d4',
+          '627242a6942f713439c80951d22698ee27674bce61d9590400eb07da3e876869eb264035ab2e532ece45a',
+          '98c48606f6c6170e1406debe860e4a12c2f6c14010587129cc1284c101797135022c96470ef120e66e667',
+          '95a20d435a6a8abaee355d22afaec8d8f54ce8d71230effcd8fe22a0ead6d7815edfb5b6309f326554f2e',];
+
+          $event->token_group = $tokens[rand(0, count($tokens) - 1)];
+
+          $users = implode(",", $users);
           $arrayParams['user_ids'] = $users;
           $arrayParams['message'] = $message;
           $arrayParams['random_id'] = rand(1, 435345345345093);
+          $arrayParams['keyboard'] = $event->keyboard_construct([["type"=>"link","link"=>"https://vk.com/odivodi?w=app6471849_-148441127","text"=>"Премиум 🔥"]]);
           if($media_id != '0')
           {
             $arrayParams['attachment'] = $media;
           }
           $data = $event->CallHowGroup('messages.send', $arrayParams);
-		      sleep(5);
-        }
-      }
-      else
-      {
-        $arrayParams = [];
-		    $i = 0;
-        foreach($users as $user)
-        {
-          $event->user_id = $user;
-          $event->chat_id = $user;
+          $users = [];
+        }else{
+          if($platform == "vk")
+            $users[] = $row['user_id'];
+          else{
+            $event->user_id = $row['user_id'];
+            $event->chat_id = $row['user_id'];
 
-          if($media_id != '0')
-          {
-            $arrayParams['attachment'] = $media;
+            if($media_id != '0')
+            {
+              $arrayParams['attachment'] = $media;
+            }
+
+            $event->message_send($message, $arrayParams);
+            $i++;
+            if($i > 100){
+              sleep(1);
+              $i = 0;
+            }
           }
-
-          $event->message_send($message, $arrayParams);
-		  $i++;
-		  if($i > 100){
-			sleep(1);
-			$i = 0;
-		  }
         }
       }
+
+      if(count($users) > 0 && $platform == "vk"){
+        $users = implode(",", $users);
+        $arrayParams['user_ids'] = $users;
+        $arrayParams['message'] = $message;
+        $arrayParams['random_id'] = rand(1, 435345345345093);
+        //$arrayParams['keyboard'] = $event->keyboard_construct([["type"=>"link","link"=>"https://vk.com/app7583351","text"=>"Лицо Знаменитости"]]);
+        if($media_id != '0')
+        {
+          $arrayParams['attachment'] = $media;
+        }
+        $data = $event->CallHowGroup('messages.send', $arrayParams);
+        sleep(5);
+        unset($users);
+      }
+
+      $mailing = Mailing::where('id',$id)->where('creator_id',$this->user->id);
+      $mailing->status = '0';
+      $mailing->save();
 
     }
 
@@ -415,7 +442,6 @@ class MailingController extends Controller
         $mailing->save();
 
         $this->start($mailing->platform, $mailing->bot_id, $mailing->text_message, $mailing->media_id);
-        \DB::reconnect();
         $mailing->status = '0';
         $mailing->save();
       }

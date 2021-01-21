@@ -30,7 +30,6 @@ use Illuminate\Support\Facades\Route;
         Route::get('me', 'AuthController@me');
         Route::post('change_password', 'AuthController@change_password');
       });
-
     });
 
     Route::group([ 'middleware' => ['api'],

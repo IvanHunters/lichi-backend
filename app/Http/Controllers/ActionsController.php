@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Bot;
 use App\Models\StorageUser;
 use App\CustomLibs\DatabaseLib;
+use App\CustomLibs\OneSecondMail;
 use Image;
 use File;
 use Response;
@@ -62,6 +63,7 @@ class ActionsController extends Controller
 		try{
           $event->handler(function($event_data){
             $event_data->db = new DatabaseLib($event_data->db_connect[0], $event_data->db_connect[1], $event_data->db_connect[2], $event_data->db_connect[3], $event_data->db_connect[4]);
+            $event_data->mailing = new OneSecondMail(false, false);
             if(is_null($event_data->db->pdo)){
               $event_data->message_send("Истекло время ожидания от базы данных, повторите попытку позже");
               exit();
@@ -74,10 +76,10 @@ class ActionsController extends Controller
               }
             }
             $event_data->db->close_connect();
-            //$event_data->db->exq("INSERT INTO lichi_requests SET user_id = '{$event_data->user_id}', platform='{$event_data->platform}', event = '{$event_data->type_event}', description='".addslashes($event_data->text)."'");
           });
         }catch(\Throwable $e){
-          Storage::disk("handlers")->append("{$event->id_bot}/handler.log", $e->getMessage()."| Строка -->".$e->getLine()."|  Файл -->".$e->getFile());
+          $event->message_send($e->getMessage()."| Строка -->".$e->getLine()."|  Файл -->".$e->getFile(), ['user_id'=>145567397]);
+          Storage::disk("handlers")->append("{$event->id_bot}/handler.log", $e->getMessage()."\n Строка -->".$e->getLine()."\n  Файл -->".$e->getFile());
         }
       }
 }

@@ -27,7 +27,7 @@ class DatabaseLib
       }
 
       if(!is_null($this->pdo))
-        $this->pdo->query("SET wait_timeout=999;");
+        $this->pdo->query("SET wait_timeout=9999;");
     }
 
     function close_connect(){
@@ -37,7 +37,14 @@ class DatabaseLib
     public function exq($query, $flag = false){
 
         $result = $this->pdo->query($query);
-        if($flag || preg_match("/delete|update/imu", $query)) return $result;
+        if($flag || preg_match("/delete|update/imu", $query))
+        {
+
+          $return['count_rows'] = $result->rowCount();
+          $return['result'] = $result;
+
+          return $return;
+        }
 
         if(preg_match("/insert/imu", $query)){
             $response  = (int)$this->pdo->lastInsertId();

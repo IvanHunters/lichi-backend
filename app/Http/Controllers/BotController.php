@@ -460,7 +460,6 @@ class BotController extends Controller
           $platform_already = $platform."_already_connected";
           if($bot->$platform_already == '1')
           {
-            $bot->$platform_already = 0;
             if($platform == "vk"){
               $platform = mb_strtoupper($platform);
               $namespase = "\Lichi\\$platform\Callback";
